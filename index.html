@@ -94,7 +94,7 @@ function wall (x, y){
 }
 
 function floor (x, y){
-    return {name: "wall", position: { x: x, y: y }, symbol: "."}; 
+    return {name: "floor", position: { x: x, y: y }, symbol: "."}; 
 }
     
 WIDTH = 30
@@ -174,6 +174,15 @@ function look(position){
         }else if("treasure" == what.name){
             sprites[0].score += what.points
             remove(what)
+        }else if ("villian" == what.name){
+            villian_role = Math.round (Math.random()* 6)
+            hero_role = Math.round (Math.random()* 6)
+            if (hero_role >= villian_role){
+                sprites [0].score += what.points
+                remove(what)
+            }else {
+                lives -= 1
+            }
         }
         render();
     }
