@@ -1,9 +1,12 @@
 <style>
-    body { background-color: black; color: white;}
+    body { background-color: rgb(72, 70, 212); color: rgb(216, 205, 248);}
+    #arrows { position: fixed; bottom: 1rem; right: 1rem;}
+    #score { position: fixed; bottom: 1rem; left: 1rem;}
 </style>
 
 <body>
-    <table>
+    <div id = "score">?</div>
+    <table id = "arrows">
         <tr>
             <td>
                 
@@ -42,6 +45,17 @@
 </body>
 
 <script>
+    
+    function look (position){
+        result = null
+        sprites.forEach(s=>{
+            if ( s.position.x == position.x && s.position.y == position.y ){
+                result = s;
+            }
+        })
+
+        return result;
+    }
     let sprites = [
         {
             name: "hero",
@@ -60,7 +74,7 @@
                 x: 15,
                 y: 15
             },
-            symbol: "$",
+            symbol: "&",
             points: 100
         },
         {
@@ -72,10 +86,8 @@
             },
             symbol: "$",
             points: 100
-        },
-        {name: "wall",   attributes: [], position: { x: 19, y: 20 }, symbol: "#", points: 100},
-        {name: "floor",   attributes: [], position: { x: 19, y: 19 }, symbol: ".", points: 100},
-    ]
+        }
+    ];
 
 function wall (x, y){
     return {name: "wall", position: { x: x, y: y }, symbol: "#"};
@@ -90,33 +102,77 @@ HEIGTH = 20
 
 for (r = 0; r < HEIGTH; r++){
     for (c = 0; c < WIDTH; c++){
-        sprites.push(floor(c, r))
+        if(r == 0 || r == HEIGTH - 1 || c == 0 || c == WIDTH - 1){
+            sprites.push(wall(c,r));
+        } else { 
+            sprites.push(floor(c, r));
+        }
     }
 }
 
+function look(position){
+        result = null
+        sprites.forEach(s=>{
+            if(s.position.x == position.x && s.position.y == position.y ){
+                if(null == result){
+                    result = s;
+                }
+            }
+        })
+        return result;
+    }
+
+    function remove(what){
+        sprites.forEach((s,i)=>{
+            if(s == what){
+                sprites.splice(i, 1); 
+            }
+        })
+    }
+
     function render(){
-        map.innerHTML = ""; //clear the map
+        map.innerHTML = "";
         sprites.forEach(sprite=>{
             div = document.createElement("div");
             div.style.position = 'absolute';
             div.style.left = sprite.position.x + "rem"
             div.style.top = sprite.position.y + "rem"
             div.innerHTML = sprite.symbol;
-            map.appendChild(div) //append to map
+            map.appendChild(div)
         })
+        score.innerHTML = sprites[0].score
     }
 
     function arrowClick(e){
         console.log(e.target.id)
         id = e.target.id;
+
+        current = sprites[0].position;
+        let destination = {x: current.x, y: current.y}
+
         if("up" == id){
-            sprites[0].position.y--;
+            destination.y--;
         }else if("down"==id){
-            sprites[0].position.y++;
+            destination.y++;
         }else if("left"==id){
-            sprites[0].position.x--;
+            destination.x--;
         }else if("right"==id){
-            sprites[0].position.x++;
+            destination.x++;
+        }
+
+        what = look (destination)
+    if(what == null || what.name == "floor"){
+        sprites[0].position = destination;
+    } else if ("right" == id){
+            destination.x++;
+    }
+    what = look(destination)
+        if(what == null  || what.name == "floor"){
+         
+            sprites[0].position = destination;
+        }else if("treasure" == what.name){
+            sprites[0].score += what.points
+            remove(what)
         }
         render();
     }
